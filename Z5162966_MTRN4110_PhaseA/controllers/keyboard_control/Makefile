@@ -47,8 +47,8 @@
 ###
 ### ---- Linked libraries ----
 ### if your program needs additional libraries:
-### INCLUDE = -I"/my_library_path/include"
-### LIBRARIES = -L"/path/to/my/library" -lmy_library -lmy_other_library
+#INCLUDE = -I"F:/Anaconda/envs/mtrn4110/include" -I"F:/Anaconda/envs/mtrn4110/"
+#LIBRARIES = -L"F:/Anaconda/envs/mtrn4110/libs" -l_tkinter -lpython3 -lpython37
 ###
 ### ---- Linking options ----
 ### if special linking flags are needed:
@@ -64,6 +64,8 @@
 ### VERBOSE = 1
 ###
 ###-----------------------------------------------------------------------------
+
+
 
 ### Do not modify: this includes Webots global Makefile.include
 null :=

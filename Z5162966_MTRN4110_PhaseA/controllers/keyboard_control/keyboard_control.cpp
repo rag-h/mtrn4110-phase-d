@@ -21,15 +21,13 @@ const int WHEEL_RADIUS = 20;                            // mm
 const int AXLE_LENGTH = 56.6;                           // mm
 const int WHEEL_CIRCUM = 2*PI*WHEEL_RADIUS;             // mm
 const int TURNING_CIRCUMFERENCE = 2*PI*(AXLE_LENGTH/2); // mm
-
+ 
 // map/world parameters
 const int TILE_SIZE = 165; // mm
 
 // function definitions
 void haltRobot(Motor *leftMotor, Motor *rightMotor);
 void keyBoardDrive(int leftVelocity, int rightVelocity, Motor *leftMotor, Motor *rightMotor);
-
-
 
 int main(int argc, char **argv) {
   // create the Robot instance.
@@ -48,31 +46,37 @@ int main(int argc, char **argv) {
   keyBoard.enable(timeStep);
   leftMotorSensor->enable(timeStep);
   rightMotorSensor->enable(timeStep);
-  leftMotor->setAcceleration(2);
-  leftMotor->setAcceleration(2);
+  leftMotor->setAcceleration(5);
+  rightMotor->setAcceleration(5);
   //int leftMotorSpeed, rightMotorSpeed;
 
   while (robot->step(timeStep) != -1) {
 
     // read the keyboard input drive based on that direction
     int keyInput = keyBoard.getKey();
-    switch (keyInput) {
-      case (keyBoard.DOWN):
-        keyBoardDrive(-ROBOT_FORWARD_SPEED, -ROBOT_FORWARD_SPEED, leftMotor, rightMotor);
-        break;
-      case (keyBoard.UP):
-        keyBoardDrive(ROBOT_FORWARD_SPEED, ROBOT_FORWARD_SPEED, leftMotor, rightMotor);
-        break;
-      case (keyBoard.LEFT):
-        keyBoardDrive(-ROBOT_TURNING_SPEED, ROBOT_TURNING_SPEED, leftMotor, rightMotor);
-        break;
-      case (keyBoard.RIGHT):
-        keyBoardDrive(ROBOT_TURNING_SPEED, -ROBOT_TURNING_SPEED, leftMotor, rightMotor);
-        break;
-      default:
-        haltRobot(leftMotor, rightMotor);
-        break;
+    if (keyInput == keyBoard.DOWN) {
+      keyBoardDrive(-ROBOT_FORWARD_SPEED, -ROBOT_FORWARD_SPEED, leftMotor, rightMotor);
     }
+    if (keyInput == keyBoard.UP) {
+      keyBoardDrive(ROBOT_FORWARD_SPEED, ROBOT_FORWARD_SPEED, leftMotor, rightMotor);
+    }
+    if (keyInput == keyBoard.LEFT) {
+      keyBoardDrive(0, ROBOT_TURNING_SPEED, leftMotor, rightMotor);
+    }
+    if (keyInput == keyBoard.RIGHT) {
+      keyBoardDrive(ROBOT_TURNING_SPEED, 0, leftMotor, rightMotor);
+    }
+    if (keyInput == -1) {
+      haltRobot(leftMotor, rightMotor);
+    }
+    std::cout << "pressing key: " << keyInput << std::endl;
+    
+    //leftMotor->setPosition(INFINITY);
+    //rightMotor->setPosition(INFINITY);
+  
+    //leftMotor->setVelocity(leftVelocity);
+    //rightMotor->setVelocity(rightVelocity);
+  
   };
 
   // Enter here exit cleanup code.
