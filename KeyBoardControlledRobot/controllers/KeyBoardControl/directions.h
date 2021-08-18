@@ -6,7 +6,8 @@ enum directions
     NORTH,
     EAST,
     SOUTH,
-    WEST
+    WEST,
+    UNKNOWN
 };
 
 #endif

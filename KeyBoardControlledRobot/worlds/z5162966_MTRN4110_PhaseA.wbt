@@ -470,10 +470,12 @@ DEF MAZE Group {
 DEF z1234567 E-puck {
   translation -0.66 0 -0.33
   rotation 0 1 0 3.141592653589793
-  controller "keyboard_control"
+  controller "KeyBoardControl"
   camera_width 320
   camera_height 240
   turretSlot [
+    Compass {
+    }
     DistanceSensor {
       translation -7.34642e-08 0 -0.03
       rotation 0 1 0 1.5708
