@@ -1,0 +1,13 @@
+import os
+print("Processing Maze Images and Generating Map")
+os.system('time jupyter nbconvert --execute --clear-output PhaseC.ipynb')
+print("")
+print("Map Generated")
+os.system('export WEBOTS_HOME=/Applications/Webots.app')
+print("WEBOTS_HOME Defined")
+os.system('cd /Applications/Webots.app')
+print("Starting Webots, Finding Shortest Path and Executing Path Plan")
+print("Please Close Webots When Simulation Has Finished")
+os.system('time /Applications/Webots.app/webots --mode=realtime PhaseAandB/worlds/z5162711_MTRN4110_PhaseA.wbt')
+print("")
+print("Processing Done and Simulation Running")
