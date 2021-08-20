@@ -25,7 +25,7 @@ using namespace std;
 
 #define SPACEBAR 32
 #define DEBOUNCE_TIME 500.0 // milliseconds
-const int TILE_CENTRE_DISTANCE = 650;
+const int TILE_CENTRE_DISTANCE = 600;
 
 // function defintions
 void keyBoardDrive(int leftVelocity, int rightVelocity, Motor *leftMotor, Motor *rightMotor);
@@ -63,6 +63,10 @@ int main(int argc, char **argv) {
   double encoderOffsetRight = 0;
   double encoderLeftTotal = 0;
   double encoderRightTotal = 0;
+  double prevEncoderLeft = 0;
+  double prevEncoderRight = 0;
+  //double encoderMoveLeft = 0;
+  //double encoderMoveRight = 0;
 
   leftMotorSensor->enable(timeStep);
   rightMotorSensor->enable(timeStep);
@@ -85,7 +89,8 @@ int main(int argc, char **argv) {
   bool realignMovementForward = false;
   bool rotateLeft = false;
   bool realignMovementSide = false;
-  
+  vector<int> robotPos{0,0};
+  int loopCount = 0;
   while (robot->step(timeStep) != -1) {
     // if control key pressed then switch states
     int keyInput = keyBoard.getKey();
@@ -116,14 +121,16 @@ int main(int argc, char **argv) {
         encoderOffsetLeft = leftMotorSensor->getValue();
         encoderOffsetRight = rightMotorSensor->getValue();
         
-        if (currStep > (int)movingPath.size()) {
+        if (currStep >= (int)movingPath.size() - 1) {
           cout << "destination reached" << endl;
           break;
         }
+        //cout << "Next Step" << endl;
         completedStep = false;
         currStep++;
       }
       if (completedStep == false) {
+        
         moveNextStep(movingPath[currStep], completedStep, encoderOffsetLeft, encoderOffsetRight,leftMotor, rightMotor, leftMotorSensor, rightMotorSensor);
       }
     }  
@@ -148,10 +155,47 @@ int main(int argc, char **argv) {
     }
 
     // calculate current position, assumed to start at the beginning
-    //encoderLeftTotal += leftMotorSensor->getValue();
-    //encoderRightTotal += leftMotorSensor->getValue();
-    //cout << "Left = " << encoderLeftTotal << " Right = " << encoderOffsetRight << endl;
+    if (loopCount % 20) {
+      prevEncoderLeft = encoderLeftTotal;
+      prevEncoderRight = encoderRightTotal;
+      encoderLeftTotal += leftMotorSensor->getValue();
+      encoderRightTotal += rightMotorSensor->getValue();
+      int tolerance = 1;
+      double rotationAmnt = 92.2469;
+      double forwardAmnt = 546.1774;
+      //  work out what robot is doing
+      if (prevEncoderLeft < encoderLeftTotal && prevEncoderRight > encoderRightTotal) {
+        //cout << "Turning right" << endl;
+        if (abs(encoderRightTotal) > tolerance*2 && fmod(abs(encoderRightTotal),rotationAmnt) < tolerance) {
+          //cout << "---------- Right Rotation finished ----------" << endl;
+          //encoderRightTotal = 0;
+          //encoderLeftTotal = 0;
+        }
+      } else if (prevEncoderLeft > encoderLeftTotal && prevEncoderRight < encoderRightTotal) {
+        //cout << "Turning left" << endl;
+        if (abs(encoderLeftTotal) > tolerance*2 && fmod(abs(encoderLeftTotal),rotationAmnt) < tolerance) {
+          //cout << "---------- Left Rotation finished ----------" << endl;
+          //encoderRightTotal = 0;
+          //encoderLeftTotal = 0;
+        }
+      } else if (prevEncoderLeft > encoderLeftTotal && prevEncoderRight > encoderRightTotal) {
+        //cout << "Moving backward" << endl;
+        if (abs(encoderLeftTotal) > tolerance*2 && fmod(abs(encoderLeftTotal),forwardAmnt) < tolerance) {
+          //cout << "---------- Backwards Tile finished ----------" << endl;
+        }
+      } else if (prevEncoderLeft < encoderLeftTotal && prevEncoderRight < encoderRightTotal) {
+        //cout << "Moving forward" << endl;
+        if (abs(encoderLeftTotal) > tolerance*2 && fmod(abs(encoderLeftTotal),forwardAmnt) < tolerance) {
+          //cout << "---------- Forward Tile finished ----------" << endl;
+        }
+      }
+      //robotPos[0] = encoderLeftTotal % 
+      //robotPos[1] = 
+      //cout << "Left = " << encoderLeftTotal << " Right = " << encoderRightTotal << endl;
+    }
+    
 
+    
 
     // realign orientation and position to centre of tile
     if (realignOrientation) {
@@ -214,7 +258,7 @@ int main(int argc, char **argv) {
 
 
 
-
+  loopCount ++;
   };
   cout << "Motion ended" << endl;
   delete robot;
@@ -232,7 +276,7 @@ void keyBoardDrive(int leftVelocity, int rightVelocity, Motor *leftMotor, Motor 
 }
 
 directions getOrientation(Compass *compass) {
-  double tolerance = 0.5;
+  double tolerance = 0.1;
   double target = 1000.0;
   double compass_0 = compass->getValues()[0] * 1000.0;
   double compass_2 = compass->getValues()[2] * 1000.0;
@@ -256,8 +300,8 @@ void realignSouth(Motor *leftMotor, Motor *rightMotor) {
   leftMotor->setPosition(INFINITY);
   rightMotor->setPosition(INFINITY);
   
-  leftMotor->setVelocity(ROBOT_TURNING_SPEED);
-  rightMotor->setVelocity(-ROBOT_TURNING_SPEED);
+  leftMotor->setVelocity(ROBOT_TURNING_SPEED/2);
+  rightMotor->setVelocity(-ROBOT_TURNING_SPEED/2);
 }
 
 void stepForward(Motor *leftMotor, Motor *rightMotor) {
